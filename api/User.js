@@ -4,8 +4,41 @@ const router = express.Router();
 // mongodb user model
 const User = require("./../models/User");
 
+// // mongodb user verification model
+// const UserVerification = require("./../models/UserVerification");
+
+// // email handler
+// const nodemailer = require("nodemailer");
+
+// // unique string
+// const { v4: uuidv4 } = require("uuid");
+
 // Password handler
 const bcrypt = require("bcrypt");
+
+// // Env variables
+// require("dotenv").config();
+
+// // Nodemailer stuff
+// const myEmail = "tothepointcode@gmail.com";
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: myEmail,
+//     pass: process.env.AUTH_PASS,
+//   },
+// });
+
+// // testing success
+// transporter.verify((error, success) => {
+//   if (error) {
+//     console.log(error);
+//   } else {
+//     console.log("Ready for messages");
+//     console.log(success);
+//     console.log(uuidv4());
+//   }
+// });
 
 // Signup
 router.post("/signup", (req, res) => {
@@ -63,11 +96,38 @@ router.post("/signup", (req, res) => {
                 email,
                 password: hashedPassword,
                 dateOfBirth,
+                verified: false,
               });
 
               newUser
                 .save()
                 .then((result) => {
+                  // Handle account verification
+                  // const currentUrl = "http://localhost:3000/";
+
+                  // const mailOptions = {
+                  //   from: myEmail,
+                  //   to: email,
+                  //   subject: "Verify Your Email",
+                  //   text:
+                  //     "Verify your email address to complete the signup and login into your account. This link expires in 6 hours.",
+                  //   html: `Press <a href=${
+                  //     currentUrl + "api/User/verify" + result._id
+                  //   }></a> to proceed.`,
+                  // };
+
+                  // transporter
+                  //   .sendMail(mailOptions)
+                  //   .then((info) => {
+                  //     console.log("Email sent: " + info.response);
+                  //     res.json({
+                  //       status: "PENDING",
+                  //       message: "Verification email sent",
+                  //     });
+                  //   })
+                  //   .catch((err) => console.log(err));
+                  // res.json({"nice": true})
+
                   res.json({
                     status: "SUCCESS",
                     message: "Signup successful",
@@ -75,6 +135,7 @@ router.post("/signup", (req, res) => {
                   });
                 })
                 .catch((err) => {
+                  console.log(err);
                   res.json({
                     status: "FAILED",
                     message: "An error occurred while saving user account!",
@@ -155,6 +216,69 @@ router.post("/signin", (req, res) => {
         });
       });
   }
+});
+
+// Verify email
+router.post("/verify/:uniqueId", (req, res) => {
+  let { uniqueId } = req.params;
+  console.log("Verified");
+  res.json({
+    status: "VERIFIED",
+    message: "Email is verified",
+  });
+  // email = email.trim();
+  // password = password.trim();
+
+  // if (email == "" || password == "") {
+  //   res.json({
+  //     status: "FAILED",
+  //     message: "Empty credentials supplied",
+  //   });
+  // } else {
+  //   // Check if user exist
+  //   User.find({ email })
+  //     .then((data) => {
+  //       if (data.length) {
+  //         // User exists
+
+  //         const hashedPassword = data[0].password;
+  //         bcrypt
+  //           .compare(password, hashedPassword)
+  //           .then((result) => {
+  //             if (result) {
+  //               // Password match
+  //               res.json({
+  //                 status: "SUCCESS",
+  //                 message: "Signin successful",
+  //                 data: data,
+  //               });
+  //             } else {
+  //               res.json({
+  //                 status: "FAILED",
+  //                 message: "Invalid password entered!",
+  //               });
+  //             }
+  //           })
+  //           .catch((err) => {
+  //             res.json({
+  //               status: "FAILED",
+  //               message: "An error occurred while comparing passwords",
+  //             });
+  //           });
+  //       } else {
+  //         res.json({
+  //           status: "FAILED",
+  //           message: "Invalid credentials entered!",
+  //         });
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       res.json({
+  //         status: "FAILED",
+  //         message: "An error occurred while checking for existing user",
+  //       });
+  //     });
+  // }
 });
 
 module.exports = router;

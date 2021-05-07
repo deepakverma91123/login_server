@@ -247,7 +247,9 @@ router.get("/verify/:uniqueString", (req, res) => {
             });
           });
       } else {
-        User.updateOne({_id: userId }, { verified: true })
+        // valid unique string so we validate the user
+
+        User.updateOne({ _id: userId }, { verified: true })
           .then(() => {
             UserVerification.deleteOne({ userId })
               .then(() => {
@@ -279,7 +281,8 @@ router.get("/verify/:uniqueString", (req, res) => {
       console.log(error);
       res.json({
         status: "FAILED",
-        message: "Account record doesn't exist. Please sign up again",
+        message:
+          "Account record doesn't exist or has been verified already. Please sign up or log in.",
       });
     });
 });

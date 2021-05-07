@@ -7,8 +7,8 @@ const User = require("./../models/User");
 // // mongodb user verification model
 // const UserVerification = require("./../models/UserVerification");
 
-// // email handler
-// const nodemailer = require("nodemailer");
+// email handler
+const nodemailer = require("nodemailer");
 
 // // unique string
 // const { v4: uuidv4 } = require("uuid");
@@ -16,29 +16,28 @@ const User = require("./../models/User");
 // Password handler
 const bcrypt = require("bcrypt");
 
-// // Env variables
-// require("dotenv").config();
+// Env variables
+require("dotenv").config();
 
-// // Nodemailer stuff
-// const myEmail = "tothepointcode@gmail.com";
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: myEmail,
-//     pass: process.env.AUTH_PASS,
-//   },
-// });
+// Nodemailer stuff
+const myEmail = "tothepointcode@gmail.com";
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: myEmail,
+    pass: process.env.AUTH_PASS,
+  },
+});
 
-// // testing success
-// transporter.verify((error, success) => {
-//   if (error) {
-//     console.log(error);
-//   } else {
-//     console.log("Ready for messages");
-//     console.log(success);
-//     console.log(uuidv4());
-//   }
-// });
+// testing success
+transporter.verify((error, success) => {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("Ready for messages");
+    console.log(success);
+  }
+});
 
 // Signup
 router.post("/signup", (req, res) => {

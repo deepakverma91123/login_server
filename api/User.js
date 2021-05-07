@@ -305,30 +305,42 @@ router.post("/signin", (req, res) => {
         if (data.length) {
           // User exists
 
-          const hashedPassword = data[0].password;
-          bcrypt
-            .compare(password, hashedPassword)
-            .then((result) => {
-              if (result) {
-                // Password match
-                res.json({
-                  status: "SUCCESS",
-                  message: "Signin successful",
-                  data: data,
-                });
-              } else {
+          // check if user is verified
+
+          if (!data[0].verified) {
+            res.json({
+              status: "FAILED",
+              message:
+                "Email hasn't been verified yet. Check your inbox for verification link.",
+            });
+          } else {
+            // email is verified so we check password
+
+            const hashedPassword = data[0].password;
+            bcrypt
+              .compare(password, hashedPassword)
+              .then((result) => {
+                if (result) {
+                  // Password match
+                  res.json({
+                    status: "SUCCESS",
+                    message: "Signin successful",
+                    data: data,
+                  });
+                } else {
+                  res.json({
+                    status: "FAILED",
+                    message: "Invalid password entered!",
+                  });
+                }
+              })
+              .catch((err) => {
                 res.json({
                   status: "FAILED",
-                  message: "Invalid password entered!",
+                  message: "An error occurred while comparing passwords",
                 });
-              }
-            })
-            .catch((err) => {
-              res.json({
-                status: "FAILED",
-                message: "An error occurred while comparing passwords",
               });
-            });
+          }
         } else {
           res.json({
             status: "FAILED",

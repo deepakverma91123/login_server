@@ -19,6 +19,9 @@ const bcrypt = require("bcrypt");
 // Env variables
 require("dotenv").config();
 
+// path for static verified page
+const path = require("path");
+
 // Nodemailer stuff
 const myEmail = "tothepointcode@gmail.com";
 // const transporter = nodemailer.createTransport({
@@ -119,14 +122,6 @@ router.post("/signup", (req, res) => {
                 .then((result) => {
                   // Handle account verification
                   sendVerificationEmail(result, res);
-
-                  // res.json({"nice": true})
-
-                  // res.json({
-                  //   status: "SUCCESS",
-                  //   message: "Signup successful",
-                  //   data: result,
-                  // });
                 })
                 .catch((err) => {
                   console.log(err);
@@ -254,10 +249,11 @@ router.get("/verify/:uniqueString", (req, res) => {
           .then(() => {
             UserVerification.deleteOne({ userId })
               .then(() => {
-                res.json({
-                  status: "VERIFIED",
-                  message: "Email is verified. You can now login",
-                });
+                // res.json({
+                //   status: "VERIFIED",
+                //   message: "Email is verified. You can now login",
+                // });
+                res.sendFile(path.join(__dirname, "./../views/verified.html"));
               })
               .catch((error) => {
                 console.log(error);

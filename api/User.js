@@ -256,7 +256,7 @@ router.get("/verify/:uniqueString", (req, res) => {
                   message: "Email is verified. You can now login",
                 });
               })
-              .then((error) => {
+              .catch((error) => {
                 console.log(error);
                 res.json({
                   status: "FAILED",

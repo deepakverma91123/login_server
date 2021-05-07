@@ -4,14 +4,14 @@ const router = express.Router();
 // mongodb user model
 const User = require("./../models/User");
 
-// // mongodb user verification model
-// const UserVerification = require("./../models/UserVerification");
+// mongodb user verification model
+const UserVerification = require("./../models/UserVerification");
 
 // email handler
 const nodemailer = require("nodemailer");
 
-// // unique string
-// const { v4: uuidv4 } = require("uuid");
+// unique string
+const { v4: uuidv4 } = require("uuid");
 
 // Password handler
 const bcrypt = require("bcrypt");
@@ -118,33 +118,8 @@ router.post("/signup", (req, res) => {
                 .save()
                 .then((result) => {
                   // Handle account verification
-                  const currentUrl = "http://localhost:3000/";
+                  sendVerificationEmail(result, res);
 
-                  const mailOptions = {
-                    from: myEmail,
-                    to: email,
-                    subject: "Verify Your Email",
-                    html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. </p> Press <a href=${
-                      currentUrl + "user/verify/" + result._id
-                    }>here</a> to proceed.`,
-                  };
-
-                  transporter
-                    .sendMail(mailOptions)
-                    .then((info) => {
-                      console.log("Email sent: " + info.response);
-                      res.json({
-                        status: "PENDING",
-                        message: "Verification email sent",
-                      });
-                    })
-                    .catch((err) => {
-                      res.json({
-                        status: "FAILED",
-                        message: "Verification email failed",
-                      });
-                      console.log(err);
-                    });
                   // res.json({"nice": true})
 
                   // res.json({
@@ -178,6 +153,60 @@ router.post("/signup", (req, res) => {
       });
   }
 });
+
+// send verification email
+const sendVerificationEmail = ({ _id, email }, res) => {
+  const currentUrl = "http://localhost:3000/";
+
+  const uniqueString = uuidv4() + _id;
+
+  const mailOptions = {
+    from: myEmail,
+    to: email,
+    subject: "Verify Your Email",
+    html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. Press <a href=${
+      currentUrl + "user/verify/" + uniqueString
+    }>here</a> to proceed. </p>`,
+  };
+
+  // set values in userVerification collection
+  const newVerification = new UserVerification({
+    userId: _id,
+    uniqueString,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 21600000
+  });
+
+  newVerification
+    .save()
+    .then((result) => {
+      console.log(result);
+      transporter
+        .sendMail(mailOptions)
+        .then((info) => {
+          console.log("Email sent: " + info.response);
+          console.log("Verification record entered");
+          res.json({
+            status: "PENDING",
+            message: "Verification email sent",
+          });
+        })
+        .catch((err) => {
+          res.json({
+            status: "FAILED",
+            message: "Verification email failed",
+          });
+          console.log(err);
+        });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.json({
+        status: "FAILED",
+        message: "Couldn't save verification data",
+      });
+    });
+};
 
 // Signin
 router.post("/signin", (req, res) => {

@@ -21,11 +21,27 @@ require("dotenv").config();
 
 // Nodemailer stuff
 const myEmail = "tothepointcode@gmail.com";
-const transporter = nodemailer.createTransport({
-  service: "gmail",
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: myEmail,
+//     pass: process.env.AUTH_PASS,
+//   },
+// });
+
+// more secure approach
+
+let transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: myEmail,
-    pass: process.env.AUTH_PASS,
+    type: "OAuth2",
+    user: "tothepointcode@gmail.com",
+    clientId: process.env.AUTH_CLIENT_ID,
+    clientSecret: process.env.AUTH_CLIENT_SECRET,
+    refreshToken: process.env.AUTH_REFRESH_TOKEN,
+    accessToken: process.env.AUTH_ACCESS_TOKEN,
   },
 });
 
@@ -102,36 +118,40 @@ router.post("/signup", (req, res) => {
                 .save()
                 .then((result) => {
                   // Handle account verification
-                  // const currentUrl = "http://localhost:3000/";
+                  const currentUrl = "http://localhost:3000/";
 
-                  // const mailOptions = {
-                  //   from: myEmail,
-                  //   to: email,
-                  //   subject: "Verify Your Email",
-                  //   text:
-                  //     "Verify your email address to complete the signup and login into your account. This link expires in 6 hours.",
-                  //   html: `Press <a href=${
-                  //     currentUrl + "api/User/verify" + result._id
-                  //   }></a> to proceed.`,
-                  // };
+                  const mailOptions = {
+                    from: myEmail,
+                    to: email,
+                    subject: "Verify Your Email",
+                    html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. </p> Press <a href=${
+                      currentUrl + "user/verify/" + result._id
+                    }>here</a> to proceed.`,
+                  };
 
-                  // transporter
-                  //   .sendMail(mailOptions)
-                  //   .then((info) => {
-                  //     console.log("Email sent: " + info.response);
-                  //     res.json({
-                  //       status: "PENDING",
-                  //       message: "Verification email sent",
-                  //     });
-                  //   })
-                  //   .catch((err) => console.log(err));
+                  transporter
+                    .sendMail(mailOptions)
+                    .then((info) => {
+                      console.log("Email sent: " + info.response);
+                      res.json({
+                        status: "PENDING",
+                        message: "Verification email sent",
+                      });
+                    })
+                    .catch((err) => {
+                      res.json({
+                        status: "FAILED",
+                        message: "Verification email failed",
+                      });
+                      console.log(err);
+                    });
                   // res.json({"nice": true})
 
-                  res.json({
-                    status: "SUCCESS",
-                    message: "Signup successful",
-                    data: result,
-                  });
+                  // res.json({
+                  //   status: "SUCCESS",
+                  //   message: "Signup successful",
+                  //   data: result,
+                  // });
                 })
                 .catch((err) => {
                   console.log(err);
@@ -218,9 +238,9 @@ router.post("/signin", (req, res) => {
 });
 
 // Verify email
-router.post("/verify/:uniqueId", (req, res) => {
+router.get("/verify/:uniqueId", (req, res) => {
   let { uniqueId } = req.params;
-  console.log("Verified");
+  console.log("Verified" + uniqueId);
   res.json({
     status: "VERIFIED",
     message: "Email is verified",

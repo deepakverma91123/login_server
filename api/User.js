@@ -166,7 +166,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
     subject: "Verify Your Email",
     html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. Press <a href=${
       currentUrl + "user/verify/" + uniqueString
-    }>here</a> to proceed. </p>`,
+    }>here</a> to proceed.</p>`,
   };
 
   // set values in userVerification collection
@@ -174,7 +174,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
     userId: _id,
     uniqueString,
     createdAt: Date.now(),
-    expiresAt: Date.now() + 21600000
+    expiresAt: Date.now() + 21600000,
   });
 
   newVerification
@@ -207,6 +207,82 @@ const sendVerificationEmail = ({ _id, email }, res) => {
       });
     });
 };
+
+// Verify email
+router.get("/verify/:uniqueString", (req, res) => {
+  let { uniqueString } = req.params;
+
+  UserVerification.find({ uniqueString })
+    .then((result) => {
+      const { userId, expiresAt } = result[0];
+
+      // checking for expired unique string
+      if (expiresAt < Date.now()) {
+        UserVerification.deleteOne({ userId })
+          .then((result) => {
+            console.log("After deletion");
+            console.log(result);
+
+            User.deleteOne({ userId })
+              .then(() => {
+                res.json({
+                  status: "FAILED",
+                  message: "Link has expired. Please sign up again.",
+                });
+              })
+              .catch((error) => {
+                console.log(error);
+                res.json({
+                  status: "FAILED",
+                  message: "Clearing user with expired unique string failed.",
+                });
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            res.json({
+              status: "FAILED",
+              message:
+                "An error occurred while clearing expired user verification record",
+            });
+          });
+      } else {
+        User.updateOne({_id: userId }, { verified: true })
+          .then(() => {
+            UserVerification.deleteOne({ userId })
+              .then(() => {
+                res.json({
+                  status: "VERIFIED",
+                  message: "Email is verified. You can now login",
+                });
+              })
+              .then((error) => {
+                console.log(error);
+                res.json({
+                  status: "FAILED",
+                  message:
+                    "An error occurred while getting rid of user verification record after successful verification.",
+                });
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            res.json({
+              status: "FAILED",
+              message:
+                "An error occurred while updating user record to show verified.",
+            });
+          });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.json({
+        status: "FAILED",
+        message: "Account record doesn't exist. Please sign up again",
+      });
+    });
+});
 
 // Signin
 router.post("/signin", (req, res) => {
@@ -264,69 +340,6 @@ router.post("/signin", (req, res) => {
         });
       });
   }
-});
-
-// Verify email
-router.get("/verify/:uniqueId", (req, res) => {
-  let { uniqueId } = req.params;
-  console.log("Verified" + uniqueId);
-  res.json({
-    status: "VERIFIED",
-    message: "Email is verified",
-  });
-  // email = email.trim();
-  // password = password.trim();
-
-  // if (email == "" || password == "") {
-  //   res.json({
-  //     status: "FAILED",
-  //     message: "Empty credentials supplied",
-  //   });
-  // } else {
-  //   // Check if user exist
-  //   User.find({ email })
-  //     .then((data) => {
-  //       if (data.length) {
-  //         // User exists
-
-  //         const hashedPassword = data[0].password;
-  //         bcrypt
-  //           .compare(password, hashedPassword)
-  //           .then((result) => {
-  //             if (result) {
-  //               // Password match
-  //               res.json({
-  //                 status: "SUCCESS",
-  //                 message: "Signin successful",
-  //                 data: data,
-  //               });
-  //             } else {
-  //               res.json({
-  //                 status: "FAILED",
-  //                 message: "Invalid password entered!",
-  //               });
-  //             }
-  //           })
-  //           .catch((err) => {
-  //             res.json({
-  //               status: "FAILED",
-  //               message: "An error occurred while comparing passwords",
-  //             });
-  //           });
-  //       } else {
-  //         res.json({
-  //           status: "FAILED",
-  //           message: "Invalid credentials entered!",
-  //         });
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       res.json({
-  //         status: "FAILED",
-  //         message: "An error occurred while checking for existing user",
-  //       });
-  //     });
-  // }
 });
 
 module.exports = router;

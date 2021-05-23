@@ -35,16 +35,13 @@ const myEmail = "tothepointcode@gmail.com";
 // more secure approach
 
 let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     type: "OAuth2",
     user: "tothepointcode@gmail.com",
     clientId: process.env.AUTH_CLIENT_ID,
     clientSecret: process.env.AUTH_CLIENT_SECRET,
     refreshToken: process.env.AUTH_REFRESH_TOKEN,
-    accessToken: process.env.AUTH_ACCESS_TOKEN,
   },
 });
 

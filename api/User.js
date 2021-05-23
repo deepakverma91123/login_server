@@ -24,15 +24,6 @@ const path = require("path");
 
 // Nodemailer stuff
 const myEmail = "tothepointcode@gmail.com";
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: myEmail,
-//     pass: process.env.AUTH_PASS,
-//   },
-// });
-
-// more secure approach
 
 let transporter = nodemailer.createTransport({
   service: "gmail",

@@ -187,7 +187,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
       console.log(error);
       res.json({
         status: "FAILED",
-        message: "Couldn't save verification data",
+        message: "Couldn't save verification email data",
       });
     });
 };

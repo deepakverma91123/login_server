@@ -281,11 +281,7 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
                         //   message:
                         //     "An error occurred while finalizing successful verification.",
                         // });
-                        let message =
-                          "An error occurred while finalizing successful verification.";
-                        res.redirect(
-                          `/user/verified?error=true&message=${message}`
-                        );
+                        
                         let message =
                           "An error occurred while finalizing successful verification.";
                         res.redirect(

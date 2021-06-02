@@ -144,50 +144,61 @@ const sendVerificationEmail = ({ _id, email }, res) => {
 
   const uniqueString = uuidv4() + _id;
 
+  // mail options
   const mailOptions = {
     from: myEmail,
     to: email,
     subject: "Verify Your Email",
     html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. Press <a href=${
-      currentUrl + "user/verify/" + uniqueString
+      currentUrl + "user/verify/" + _id + "/" + uniqueString
     }>here</a> to proceed.</p>`,
   };
 
-  // set values in userVerification collection
-  const newVerification = new UserVerification({
-    userId: _id,
-    uniqueString,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 21600000,
-  });
+  // hash the uniqueString
+  const saltRounds = 10;
+  bcrypt
+    .hash(uniqueString, saltRounds)
+    .then((hashedUniqueString) => {
+      // set values in userVerification collection
+      const newVerification = new UserVerification({
+        userId: _id,
+        uniqueString: hashedUniqueString,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 21600000,
+      });
 
-  newVerification
-    .save()
-    .then((result) => {
-      console.log(result);
-      transporter
-        .sendMail(mailOptions)
-        .then((info) => {
-          console.log("Email sent: " + info.response);
-          console.log("Verification record entered");
-          res.json({
-            status: "PENDING",
-            message: "Verification email sent",
-          });
+      newVerification
+        .save()
+        .then(() => {
+          transporter
+            .sendMail(mailOptions)
+            .then(() => {
+              // email sent and verification record saved.
+              res.json({
+                status: "PENDING",
+                message: "Verification email sent",
+              });
+            })
+            .catch((err) => {
+              res.json({
+                status: "FAILED",
+                message: "Verification email failed",
+              });
+              console.log(err);
+            });
         })
-        .catch((err) => {
+        .catch((error) => {
+          console.log(error);
           res.json({
             status: "FAILED",
-            message: "Verification email failed",
+            message: "Couldn't save verification email data",
           });
-          console.log(err);
         });
     })
-    .catch((error) => {
-      console.log(error);
+    .catch(() => {
       res.json({
         status: "FAILED",
-        message: "Couldn't save verification email data",
+        message: "An error occurred while hashing email data!",
       });
     });
 };

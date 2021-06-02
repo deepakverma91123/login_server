@@ -204,15 +204,16 @@ const sendVerificationEmail = ({ _id, email }, res) => {
 };
 
 // Verify email
-router.get("/verify/:uniqueString", (req, res) => {
-  let { uniqueString } = req.params;
+router.get("/verify/:userId/:uniqueString", (req, res) => {
+  let { userId, uniqueString } = req.params;
 
-  UserVerification.find({ uniqueString })
+  UserVerification.find({ userId })
     .then((result) => {
       if (result.length > 0) {
         // user verification record exists so we proceed
 
-        const { userId, expiresAt } = result[0];
+        const { expiresAt } = result[0];
+        const hashedUniqueString = result[0].uniqueString;
 
         // checking for expired unique string
         if (expiresAt < Date.now()) {
@@ -249,46 +250,71 @@ router.get("/verify/:uniqueString", (req, res) => {
               // });
               let message =
                 "An error occurred while clearing expired user verification record";
-
               res.redirect(`/user/verified?error=true&message=${message}`);
             });
         } else {
-          // valid unique string so we validate the user
+          // valid record exists so we validate the user string
+          // First compare the hashed unique string
 
-          User.updateOne({ _id: userId }, { verified: true })
-            .then(() => {
-              UserVerification.deleteOne({ userId })
-                .then(() => {
-                  // res.json({
-                  //   status: "VERIFIED",
-                  //   message: "Email is verified. You can now login",
-                  // });
-                  res.sendFile(
-                    path.join(__dirname, "./../views/verified.html")
-                  );
-                })
-                .catch((error) => {
-                  console.log(error);
-                  // res.json({
-                  //   status: "FAILED",
-                  //   message:
-                  //     "An error occurred while finalizing successful verification.",
-                  // });
-                  let message =
-                    "An error occurred while finalizing successful verification.";
-                  res.redirect(`/user/verified?error=true&message=${message}`);
-                });
+          bcrypt
+            .compare(uniqueString, hashedUniqueString)
+            .then((result) => {
+              if (result) {
+                // Strings match
+
+                User.updateOne({ _id: userId }, { verified: true })
+                  .then(() => {
+                    UserVerification.deleteOne({ userId })
+                      .then(() => {
+                        // res.json({
+                        //   status: "VERIFIED",
+                        //   message: "Email is verified. You can now login",
+                        // });
+                        res.sendFile(
+                          path.join(__dirname, "./../views/verified.html")
+                        );
+                      })
+                      .catch((error) => {
+                        console.log(error);
+                        // res.json({
+                        //   status: "FAILED",
+                        //   message:
+                        //     "An error occurred while finalizing successful verification.",
+                        // });
+                        let message =
+                          "An error occurred while finalizing successful verification.";
+                        res.redirect(
+                          `/user/verified?error=true&message=${message}`
+                        );
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    // res.json({
+                    //   status: "FAILED",
+                    //   message:
+                    //     "An error occurred while updating user record to show verified.",
+                    // });
+                    let message =
+                      "An error occurred while updating user record to show verified.";
+                    res.redirect(
+                      `/user/verified?error=true&message=${message}`
+                    );
+                  });
+              } else {
+                // Existing record but incorrect verification details passed.
+                
+                // res.json({
+                //   status: "FAILED",
+                //   message: "Invalid verification details passed. Check your inbox.",
+                // });
+              }
             })
-            .catch((error) => {
-              console.log(error);
-              // res.json({
-              //   status: "FAILED",
-              //   message:
-              //     "An error occurred while updating user record to show verified.",
-              // });
-              let message =
-                "An error occurred while updating user record to show verified.";
-              res.redirect(`/user/verified?error=true&message=${message}`);
+            .catch((err) => {
+              res.json({
+                status: "FAILED",
+                message: "An error occurred while comparing unique strings",
+              });
             });
         }
       } else {

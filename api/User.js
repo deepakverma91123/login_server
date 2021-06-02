@@ -215,12 +215,7 @@ router.get("/verify/:uniqueString", (req, res) => {
                   //   message: "Link has expired. Please sign up again.",
                   // });
                   let message = "Link has expired. Please sign up again.";
-                  res.sendFile(
-                    path.join(
-                      __dirname,
-                      `./../views/verified.html?error=true&message=${message}`
-                    )
-                  );
+                  res.redirect(`/user/verified?error=true&message=${message}`);
                 })
                 .catch((error) => {
                   console.log(error);
@@ -230,12 +225,7 @@ router.get("/verify/:uniqueString", (req, res) => {
                   // });
                   let message =
                     "Clearing user with expired unique string failed.";
-                  res.sendFile(
-                    path.join(
-                      __dirname,
-                      `./../views/verified.html?error=true&message=${message}`
-                    )
-                  );
+                  res.redirect(`/user/verified?error=true&message=${message}`);
                 });
             })
             .catch((error) => {
@@ -248,12 +238,8 @@ router.get("/verify/:uniqueString", (req, res) => {
               // });
               let message =
                 "An error occurred while clearing expired user verification record";
-              res.sendFile(
-                path.join(
-                  __dirname,
-                  `./../views/verified.html?error=true&message=${message}`
-                )
-              );
+
+              res.redirect(`/user/verified?error=true&message=${message}`);
             });
         } else {
           // valid unique string so we validate the user
@@ -279,12 +265,7 @@ router.get("/verify/:uniqueString", (req, res) => {
                   // });
                   let message =
                     "An error occurred while finalizing successful verification.";
-                  res.sendFile(
-                    path.join(
-                      __dirname,
-                      `./../views/verified.html?error=true&message=${message}`
-                    )
-                  );
+                  res.redirect(`/user/verified?error=true&message=${message}`);
                 });
             })
             .catch((error) => {
@@ -296,12 +277,7 @@ router.get("/verify/:uniqueString", (req, res) => {
               // });
               let message =
                 "An error occurred while updating user record to show verified.";
-              res.sendFile(
-                path.join(
-                  __dirname,
-                  `./../views/verified.html?error=true&message=${message}`
-                )
-              );
+              res.redirect(`/user/verified?error=true&message=${message}`);
             });
         }
       } else {
@@ -313,12 +289,7 @@ router.get("/verify/:uniqueString", (req, res) => {
         // });
         let message =
           "Account record doesn't exist or has been verified already. Please sign up or log in.";
-        res.sendFile(
-          path.join(
-            __dirname,
-            `./../views/verified.html?error=true&message=${message}`
-          )
-        );
+        res.redirect(`/user/verified?error=true&message=${message}`);
       }
     })
     .catch((error) => {
@@ -330,13 +301,13 @@ router.get("/verify/:uniqueString", (req, res) => {
       // });
       let message =
         "An error occurred while checking for existing user verification record";
-      res.sendFile(
-        path.join(
-          __dirname,
-          `./../views/verified.html?error=true&message=${message}`
-        )
-      );
+      res.redirect(`/user/verified?error=true&message=${message}`);
     });
+});
+
+// Verified page route
+router.get("/verified", (req, res) => {
+  res.sendFile(path.join(__dirname, `./../views/verified.html`));
 });
 
 // Signin

@@ -210,27 +210,50 @@ router.get("/verify/:uniqueString", (req, res) => {
               // delete expired user
               User.deleteOne({ userId })
                 .then(() => {
-                  res.json({
-                    status: "FAILED",
-                    message: "Link has expired. Please sign up again.",
-                  });
+                  // res.json({
+                  //   status: "FAILED",
+                  //   message: "Link has expired. Please sign up again.",
+                  // });
+                  let message = "Link has expired. Please sign up again.";
+                  res.sendFile(
+                    path.join(
+                      __dirname,
+                      `./../views/verified.html?error=true&message=${message}`
+                    )
+                  );
                 })
                 .catch((error) => {
                   console.log(error);
-                  res.json({
-                    status: "FAILED",
-                    message: "Clearing user with expired unique string failed.",
-                  });
+                  // res.json({
+                  //   status: "FAILED",
+                  //   message: "Clearing user with expired unique string failed.",
+                  // });
+                  let message =
+                    "Clearing user with expired unique string failed.";
+                  res.sendFile(
+                    path.join(
+                      __dirname,
+                      `./../views/verified.html?error=true&message=${message}`
+                    )
+                  );
                 });
             })
             .catch((error) => {
               // deletion failed
               console.log(error);
-              res.json({
-                status: "FAILED",
-                message:
-                  "An error occurred while clearing expired user verification record",
-              });
+              // res.json({
+              //   status: "FAILED",
+              //   message:
+              //     "An error occurred while clearing expired user verification record",
+              // });
+              let message =
+                "An error occurred while clearing expired user verification record";
+              res.sendFile(
+                path.join(
+                  __dirname,
+                  `./../views/verified.html?error=true&message=${message}`
+                )
+              );
             });
         } else {
           // valid unique string so we validate the user
@@ -249,38 +272,70 @@ router.get("/verify/:uniqueString", (req, res) => {
                 })
                 .catch((error) => {
                   console.log(error);
-                  res.json({
-                    status: "FAILED",
-                    message:
-                      "An error occurred while finalizing successful verification.",
-                  });
+                  // res.json({
+                  //   status: "FAILED",
+                  //   message:
+                  //     "An error occurred while finalizing successful verification.",
+                  // });
+                  let message =
+                    "An error occurred while finalizing successful verification.";
+                  res.sendFile(
+                    path.join(
+                      __dirname,
+                      `./../views/verified.html?error=true&message=${message}`
+                    )
+                  );
                 });
             })
             .catch((error) => {
               console.log(error);
-              res.json({
-                status: "FAILED",
-                message:
-                  "An error occurred while updating user record to show verified.",
-              });
+              // res.json({
+              //   status: "FAILED",
+              //   message:
+              //     "An error occurred while updating user record to show verified.",
+              // });
+              let message =
+                "An error occurred while updating user record to show verified.";
+              res.sendFile(
+                path.join(
+                  __dirname,
+                  `./../views/verified.html?error=true&message=${message}`
+                )
+              );
             });
         }
       } else {
         // user verification record doesn't exist
-        res.json({
-          status: "FAILED",
-          message:
-            "Account record doesn't exist or has been verified already. Please sign up or log in.",
-        });
+        // res.json({
+        //   status: "FAILED",
+        //   message:
+        //     "Account record doesn't exist or has been verified already. Please sign up or log in.",
+        // });
+        let message =
+          "Account record doesn't exist or has been verified already. Please sign up or log in.";
+        res.sendFile(
+          path.join(
+            __dirname,
+            `./../views/verified.html?error=true&message=${message}`
+          )
+        );
       }
     })
     .catch((error) => {
       console.log(error);
-      res.json({
-        status: "FAILED",
-        message:
-          "An error occurred while checking for existing user verification record",
-      });
+      // res.json({
+      //   status: "FAILED",
+      //   message:
+      //     "An error occurred while checking for existing user verification record",
+      // });
+      let message =
+        "An error occurred while checking for existing user verification record";
+      res.sendFile(
+        path.join(
+          __dirname,
+          `./../views/verified.html?error=true&message=${message}`
+        )
+      );
     });
 });
 
@@ -307,8 +362,7 @@ router.post("/signin", (req, res) => {
           if (!data[0].verified) {
             res.json({
               status: "FAILED",
-              message:
-                "Email hasn't been verified yet. Check your inbox.",
+              message: "Email hasn't been verified yet. Check your inbox.",
             });
           } else {
             // email is verified so we check password

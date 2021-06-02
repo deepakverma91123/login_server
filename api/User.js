@@ -286,6 +286,11 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
                         res.redirect(
                           `/user/verified?error=true&message=${message}`
                         );
+                        let message =
+                          "An error occurred while finalizing successful verification.";
+                        res.redirect(
+                          `/user/verified?error=true&message=${message}`
+                        );
                       });
                   })
                   .catch((error) => {
@@ -303,18 +308,23 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
                   });
               } else {
                 // Existing record but incorrect verification details passed.
-                
+
                 // res.json({
                 //   status: "FAILED",
                 //   message: "Invalid verification details passed. Check your inbox.",
                 // });
+                let message =
+                  "Invalid verification details passed. Check your inbox.";
+                res.redirect(`/user/verified?error=true&message=${message}`);
               }
             })
             .catch((err) => {
-              res.json({
-                status: "FAILED",
-                message: "An error occurred while comparing unique strings",
-              });
+              // res.json({
+              //   status: "FAILED",
+              //   message: "An error occurred while comparing unique strings",
+              // });
+              let message = "An error occurred while comparing unique strings.";
+              res.redirect(`/user/verified?error=true&message=${message}`);
             });
         }
       } else {
@@ -343,7 +353,7 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
 });
 
 // Verified page route
-router.get("/verified", (req, res) => {
+router.get("/verified", (_, res) => {
   res.sendFile(path.join(__dirname, `./../views/verified.html`));
 });
 

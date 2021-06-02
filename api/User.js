@@ -252,7 +252,7 @@ router.get("/verify/:uniqueString", (req, res) => {
                   res.json({
                     status: "FAILED",
                     message:
-                      "An error occurred while getting rid of user verification record after successful verification.",
+                      "An error occurred while finalizing successful verification.",
                   });
                 });
             })
@@ -308,7 +308,7 @@ router.post("/signin", (req, res) => {
             res.json({
               status: "FAILED",
               message:
-                "Email hasn't been verified yet. Check your inbox for verification link.",
+                "Email hasn't been verified yet. Check your inbox.",
             });
           } else {
             // email is verified so we check password

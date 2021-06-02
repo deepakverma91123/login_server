@@ -281,7 +281,7 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
                         //   message:
                         //     "An error occurred while finalizing successful verification.",
                         // });
-                        
+
                         let message =
                           "An error occurred while finalizing successful verification.";
                         res.redirect(
@@ -420,6 +420,49 @@ router.post("/signin", (req, res) => {
         });
       });
   }
+});
+
+// Password reset stuff
+router.post("/requestPasswordReset", (req, res) => {
+  const { email } = req.params;
+
+  // check if email exists.
+  User.find({ email })
+    .then((data) => {
+      if (data.length) {
+        // User exists
+
+        // check if user is verified
+
+        if (!data[0].verified) {
+          res.json({
+            status: "FAILED",
+            message: "Email hasn't been verified yet. Check your inbox.",
+          });
+        } else {
+          // email is proceed with reset request
+          // prepare password reset token
+
+
+
+
+          
+
+        }
+      } else {
+        res.json({
+          status: "FAILED",
+          message: "No account with the supplied email exists!",
+        });
+      }
+    })
+    .catch((err) => {
+      res.json({
+        status: "FAILED",
+        message: "An error occurred while checking for existing user",
+      });
+      console.log(err);
+    });
 });
 
 module.exports = router;

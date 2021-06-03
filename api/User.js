@@ -528,147 +528,121 @@ const sendResetEmail = ({ _id, email }, redirectUrl, res) => {
 };
 
 // Actually reset password
-router.post("/resetPassword/:userId/:uniqueString", (req, res) => {
-  let { userId, uniqueString } = req.params;
+router.post("/resetPassword", (req, res) => {
+  let { userId, resetString, newPassword } = req.body;
 
-  UserVerification.find({ userId })
+  PasswordReset.find({ userId })
     .then((result) => {
       if (result.length > 0) {
-        // user verification record exists so we proceed
+        // password reset record exists so we proceed
 
         const { expiresAt } = result[0];
-        const hashedUniqueString = result[0].uniqueString;
+        const hashedResetString = result[0].resetString;
 
-        // checking for expired unique string
+        // checking for expired reset string
         if (expiresAt < Date.now()) {
-          UserVerification.deleteOne({ userId })
+          PasswordReset.deleteOne({ userId })
             .then((result) => {
-              // delete expired user
-              User.deleteOne({ userId })
-                .then(() => {
-                  // res.json({
-                  //   status: "FAILED",
-                  //   message: "Link has expired. Please sign up again.",
-                  // });
-                  let message = "Link has expired. Please sign up again.";
-                  res.redirect(`/user/verified?error=true&message=${message}`);
-                })
-                .catch((error) => {
-                  console.log(error);
-                  // res.json({
-                  //   status: "FAILED",
-                  //   message: "Clearing user with expired unique string failed.",
-                  // });
-                  let message =
-                    "Clearing user with expired unique string failed.";
-                  res.redirect(`/user/verified?error=true&message=${message}`);
-                });
+              // Reset record deleted successfully
+              res.json({
+                status: "FAILED",
+                message: "Password reset link has expired.",
+              });
             })
             .catch((error) => {
               // deletion failed
               console.log(error);
-              // res.json({
-              //   status: "FAILED",
-              //   message:
-              //     "An error occurred while clearing expired user verification record",
-              // });
-              let message =
-                "An error occurred while clearing expired user verification record";
-              res.redirect(`/user/verified?error=true&message=${message}`);
+              res.json({
+                status: "FAILED",
+                message: "Clearing password reset record failed.",
+              });
             });
         } else {
-          // valid record exists so we validate the user string
+          // valid reset record exists so we validate the reset string
           // First compare the hashed unique string
 
           bcrypt
-            .compare(uniqueString, hashedUniqueString)
+            .compare(resetString, hashedResetString)
             .then((result) => {
               if (result) {
                 // Strings match
+                // Hash password again
 
-                User.updateOne({ _id: userId }, { verified: true })
-                  .then(() => {
-                    UserVerification.deleteOne({ userId })
+                const saltRounds = 10;
+                bcrypt
+                  .hash(newPassword, saltRounds)
+                  .then((hashedNewPassword) => {
+                    // update user password record
+
+                    User.updateOne(
+                      { _id: userId },
+                      { password: hashedNewPassword }
+                    )
                       .then(() => {
-                        // res.json({
-                        //   status: "VERIFIED",
-                        //   message: "Email is verified. You can now login",
-                        // });
-                        res.sendFile(
-                          path.join(__dirname, "./../views/verified.html")
-                        );
+                        // Update complete. Now delete reset record
+                        PasswordReset.deleteOne({ userId })
+                          .then(() => {
+                            // both user record and reset record updated
+                            res.json({
+                              status: "SUCCESS",
+                              message:
+                                "Password has been reseted successfully.",
+                            });
+                          })
+                          .catch((error) => {
+                            console.log(error);
+                            res.json({
+                              status: "FAILED",
+                              message:
+                                "An error occurred while finalizing password reset.",
+                            });
+                          });
                       })
                       .catch((error) => {
                         console.log(error);
-                        // res.json({
-                        //   status: "FAILED",
-                        //   message:
-                        //     "An error occurred while finalizing successful verification.",
-                        // });
-
-                        let message =
-                          "An error occurred while finalizing successful verification.";
-                        res.redirect(
-                          `/user/verified?error=true&message=${message}`
-                        );
+                        res.json({
+                          status: "FAILED",
+                          message: "Updating user password failed.",
+                        });
                       });
                   })
                   .catch((error) => {
                     console.log(error);
-                    // res.json({
-                    //   status: "FAILED",
-                    //   message:
-                    //     "An error occurred while updating user record to show verified.",
-                    // });
-                    let message =
-                      "An error occurred while updating user record to show verified.";
-                    res.redirect(
-                      `/user/verified?error=true&message=${message}`
-                    );
+                    res.json({
+                      status: "FAILED",
+                      message: "An error occurred while hashing new password.",
+                    });
                   });
               } else {
-                // Existing record but incorrect verification details passed.
+                // Existing record but incorrect reset string passed.
 
-                // res.json({
-                //   status: "FAILED",
-                //   message: "Invalid verification details passed. Check your inbox.",
-                // });
-                let message =
-                  "Invalid verification details passed. Check your inbox.";
-                res.redirect(`/user/verified?error=true&message=${message}`);
+                res.json({
+                  status: "FAILED",
+                  message: "Invalid password reset details passed.",
+                });
               }
             })
             .catch((err) => {
-              // res.json({
-              //   status: "FAILED",
-              //   message: "An error occurred while comparing unique strings",
-              // });
-              let message = "An error occurred while comparing unique strings.";
-              res.redirect(`/user/verified?error=true&message=${message}`);
+              res.json({
+                status: "FAILED",
+                message: "Comparing password reset strings failed",
+              });
             });
         }
       } else {
-        // user verification record doesn't exist
-        // res.json({
-        //   status: "FAILED",
-        //   message:
-        //     "Account record doesn't exist or has been verified already. Please sign up or log in.",
-        // });
-        let message =
-          "Account record doesn't exist or has been verified already. Please sign up or log in.";
-        res.redirect(`/user/verified?error=true&message=${message}`);
+        // Password reset record doesn't exist
+        res.json({
+          status: "FAILED",
+          message: "Password reset request not found.",
+        });
       }
     })
     .catch((error) => {
       console.log(error);
-      // res.json({
-      //   status: "FAILED",
-      //   message:
-      //     "An error occurred while checking for existing user verification record",
-      // });
-      let message =
-        "An error occurred while checking for existing user verification record";
-      res.redirect(`/user/verified?error=true&message=${message}`);
+      res.json({
+        status: "FAILED",
+        message: "Checking for existing password reset record failed.",
+      });
     });
 });
 

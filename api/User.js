@@ -600,8 +600,7 @@ router.post("/resetPassword", (req, res) => {
                             // both user record and reset record updated
                             res.json({
                               status: "SUCCESS",
-                              message:
-                                "Password has been reseted successfully.",
+                              message: "Password has been reset successfully.",
                             });
                           })
                           .catch((error) => {

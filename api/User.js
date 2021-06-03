@@ -427,7 +427,7 @@ router.post("/signin", (req, res) => {
 
 // Password reset stuff
 router.post("/requestPasswordReset", (req, res) => {
-  const { email, redirectUrl } = req.params;
+  const { email, redirectUrl } = req.body;
 
   // check if email exists.
   User.find({ email })

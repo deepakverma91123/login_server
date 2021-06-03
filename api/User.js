@@ -473,7 +473,7 @@ const sendResetEmail = ({ _id, email }, redirectUrl, res) => {
     from: myEmail,
     to: email,
     subject: "Password Reset",
-    html: `<p>We heard that you lost your password.<br/> Don't worry, use the link below to reset it. <br/> This link <b>expires in 60 minutes</b>. <br/ > Press <a href=${
+    html: `<p>We heard that you lost your password.</p> <p> Don't worry, use the link below to reset it.</p> <p> This link <b>expires in 60 minutes</b>. </p> <p>Press <a href=${
       redirectUrl + "/" + _id + "/" + resetString
     }>here</a> to proceed.</p>`,
   };

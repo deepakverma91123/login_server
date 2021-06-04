@@ -23,13 +23,11 @@ require("dotenv").config();
 const path = require("path");
 
 // Nodemailer stuff
-const myEmail = "tothepointcode@gmail.com";
-
 let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     type: "OAuth2",
-    user: "tothepointcode@gmail.com",
+    user: process.env.AUTH_EMAIL,
     clientId: process.env.AUTH_CLIENT_ID,
     clientSecret: process.env.AUTH_CLIENT_SECRET,
     refreshToken: process.env.AUTH_REFRESH_TOKEN,
@@ -146,7 +144,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
 
   // mail options
   const mailOptions = {
-    from: myEmail,
+    from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Verify Your Email",
     html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. Press <a href=${

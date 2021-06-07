@@ -147,7 +147,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
     from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Verify Your Email",
-    html: `<p> Verify your email address to complete the signup and login into your account. This link <b>expires in 6 hours</b>. Press <a href=${
+    html: `<p>Verify your email address to complete the signup and login into your account.</p><p>This link <b>expires in 6 hours</b>.</p><p>Press <a href=${
       currentUrl + "user/verify/" + _id + "/" + uniqueString
     }>here</a> to proceed.</p>`,
   };

@@ -432,12 +432,12 @@ const sendResetEmail = ({ _id, email }, redirectUrl, res) => {
         }>here</a> to proceed.</p>`,
       };
 
-      // hash the uniqueString
+      // hash the resetString
       const saltRounds = 10;
       bcrypt
         .hash(resetString, saltRounds)
         .then((hashedResetString) => {
-          // set values in userVerification collection
+          // set values in password reset collection
           const newPasswordReset = new PasswordReset({
             userId: _id,
             resetString: hashedResetString,
@@ -522,7 +522,7 @@ router.post("/resetPassword", (req, res) => {
             });
         } else {
           // valid reset record exists so we validate the reset string
-          // First compare the hashed unique string
+          // First compare the hashed reset string
 
           bcrypt
             .compare(resetString, hashedResetString)

@@ -215,7 +215,7 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
           UserVerification.deleteOne({ userId })
             .then((result) => {
               // delete expired user
-              User.deleteOne({ userId })
+              User.deleteOne({ _id: userId })
                 .then(() => {
                   let message = "Link has expired. Please sign up again.";
                   res.redirect(`/user/verified?error=true&message=${message}`);

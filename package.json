@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js"
   },
-  "author": "Terra Cobynnha",
+  "author": "Cobynnha",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.0.0",

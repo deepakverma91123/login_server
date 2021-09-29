@@ -6,6 +6,6 @@ Codebase for a simple NodeJs and MongoDB login backend server. Built for a tutor
 
 Checkout the video series below
 
-- Part I - [Link to video](https://youtu.be/5yU-P0grJjk)
-- Part II - [Link to video](https://youtu.be/yY2gXnRGVUw)
-- Part III - [Link to video](https://youtu.be/zOsbxOtRgE8) - Hosting on Heroku
+- [Building The Login Backend](https://www.youtube.com/playlist?list=PLk8gdrb2DmCi-9ys7sVZvKNQISs5Bkw-t)
+- [Email Verification](https://www.youtube.com/playlist?list=PLk8gdrb2DmCgItOhBqAQOzyrH5GJfA7Ze)
+- [Forgot Password](https://www.youtube.com/playlist?list=PLk8gdrb2DmChnvlwSWnnzSW1WyEPQQeQ2)
